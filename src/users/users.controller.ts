@@ -1,7 +1,8 @@
-import {Controller, Get, Param, Delete, Res, Put, Body} from '@nestjs/common';
+import {Controller, Get, Param, Delete, Res, Put, Body, UseGuards} from '@nestjs/common';
 import {UsersService} from "./users.service";
 import {UserInterface} from "./interfaces/user.interface";
 import {UserDto} from "./dtos/userDto";
+import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {HttpResponse} from "../globalTypes";
 
 @Controller('users')
@@ -11,6 +12,7 @@ export class UsersController {
     /**
      * get all users
      */
+    @UseGuards(JwtAuthGuard)
     @Get()
     async findAll(): Promise<HttpResponse<UserInterface[] >> {
         const users: UserInterface[] = await this.usersService.findAll();

@@ -6,6 +6,7 @@ import {User, UserSchema} from "../users/schemas/user.schema";
 import {UsersModule} from "../users/users.module";
 import {PassportModule} from "@nestjs/passport";
 import {LocalStrategy} from "./local.strategy";
+import {JwtStrategy} from "./jwt.strategy";
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 
@@ -15,10 +16,10 @@ import { jwtConstants } from './constants';
       MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
       JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '600s' },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy]
+  providers: [AuthService, LocalStrategy, JwtStrategy]
 })
 export class AuthModule {}
