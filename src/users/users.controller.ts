@@ -33,7 +33,6 @@ export class UsersController {
       success: true,
     };
   }
-
   /**
    * get user by id
    * @param res
