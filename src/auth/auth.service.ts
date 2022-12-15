@@ -2,19 +2,22 @@ import {Model} from 'mongoose';
 import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import {User, UserDocument} from "../users/schemas/user.schema";
-import {UserDto} from "../users/dtos/userDto";
-import {UsersService} from "../users/users.service";
+import {User, UserDocument} from '../users/schemas/user.schema';
+import {UserDto} from '../users/dtos/userDto';
+import {UsersService} from '../users/users.service';
 import {JwtService} from '@nestjs/jwt';
-import {UserInterface} from "../users/interfaces/user.interface";
-import {LoginPayloadInterface, LoginReturnInterface} from "../auth/interfaces/login.payload";
+import {UserInterface} from '../users/interfaces/user.interface';
+import {
+  LoginPayloadInterface,
+  LoginReturnInterface,
+} from './interfaces/login.payload';
 const salt: number = 10;
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectModel(User.name)
-        private userModel: Model<UserDocument>,
+    private userModel: Model<UserDocument>,
         private usersService: UsersService,
         private jwtService: JwtService
     ) {
@@ -22,7 +25,7 @@ export class AuthService {
 
     /**
      * create new user
-     * @param createUserDto
+   * @param createUserDto
      */
     async create(createUserDto: UserDto): Promise<User> {
         const hash: string =  await bcrypt.hash(createUserDto.password, salt);
@@ -54,7 +57,7 @@ export class AuthService {
     async login(user: UserInterface): Promise<LoginReturnInterface> {
         const payload: LoginPayloadInterface = {username: user.email, sub: user._id};
         return {
-            access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload),
         };
     }
 
