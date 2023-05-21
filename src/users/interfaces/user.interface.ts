@@ -5,4 +5,5 @@ export interface UserInterface {
     age: number;
     email: string;
     password: string;
+    roleType: string;
 };
