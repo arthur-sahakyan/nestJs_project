@@ -7,6 +7,7 @@ import {UserDto} from '../users/dtos/userDto';
 import {UsersService} from '../users/users.service';
 import {JwtService} from '@nestjs/jwt';
 import {UserInterface} from '../users/interfaces/user.interface';
+import {UserRepository} from "../repositories/base/user.repository";
 import {
   LoginPayloadInterface,
   LoginReturnInterface,
@@ -27,7 +28,7 @@ export class AuthService {
    * @param createUserDto
    */
   async create(createUserDto: UserDto): Promise<User> | never {
-    const existUser = await this.userModel.findOne({
+    const existUser = await this.usersService.findByQuery({
       email: createUserDto.email,
     });
     if (existUser)
@@ -38,7 +39,7 @@ export class AuthService {
     const hash: string = await bcrypt.hash(createUserDto.password, salt);
 
     createUserDto.password = hash;
-    const createdUser = new this.userModel(createUserDto);
+    const createdUser = this.usersService.create(createUserDto)
     return createdUser.save();
   }
 

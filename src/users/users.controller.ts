@@ -17,7 +17,7 @@ import {Role} from '../enums/role.enum';
 import {RolesGuard} from '../guards/roles.guard';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
+// @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
@@ -36,60 +36,60 @@ export class UsersController {
       success: true,
     };
   }
-
-  /**
-   * get user by id
-   * @param res
-   * @param id
-   */
-  @Get(':id')
-  async findById(
-    @Param('id') id: string,
-  ): Promise<HttpResponse<UserInterface | null>> {
-    const user: UserInterface = await this.usersService.findById(id);
-    return {
-      data: user,
-      errors: [],
-      message: '',
-      status: 200,
-      success: true,
-    };
-  }
-
-  /**
-   * delete user
-   * @param id
-   */
-  @Delete(':id')
-  @Roles(Role.Admin)
-  async delete(@Param('id') id: string): Promise<HttpResponse<null>> {
-    await this.usersService.delete(id);
-    return {
-      data: null,
-      errors: [],
-      message: 'User was deleted successfully',
-      status: 200,
-      success: true,
-    };
-  }
-
-  /**
-   * update user
-   * @param id
-   * @param body
-   */
-  @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() body: UserDto,
-  ): Promise<HttpResponse<UserInterface | null>> {
-    const user: UserInterface = await this.usersService.update(id, body);
-    return {
-      data: user,
-      errors: [],
-      message: 'User was updated successfully',
-      status: 200,
-      success: true,
-    };
-  }
+  //
+  // /**
+  //  * get user by id
+  //  * @param res
+  //  * @param id
+  //  */
+  // @Get(':id')
+  // async findById(
+  //   @Param('id') id: string,
+  // ): Promise<HttpResponse<UserInterface | null>> {
+  //   const user: UserInterface = await this.usersService.findById(id);
+  //   return {
+  //     data: user,
+  //     errors: [],
+  //     message: '',
+  //     status: 200,
+  //     success: true,
+  //   };
+  // }
+  //
+  // /**
+  //  * delete user
+  //  * @param id
+  //  */
+  // @Delete(':id')
+  // @Roles(Role.Admin)
+  // async delete(@Param('id') id: string): Promise<HttpResponse<null>> {
+  //   await this.usersService.delete(id);
+  //   return {
+  //     data: null,
+  //     errors: [],
+  //     message: 'User was deleted successfully',
+  //     status: 200,
+  //     success: true,
+  //   };
+  // }
+  //
+  // /**
+  //  * update user
+  //  * @param id
+  //  * @param body
+  //  */
+  // @Put(':id')
+  // async update(
+  //   @Param('id') id: string,
+  //   @Body() body: UserDto,
+  // ): Promise<HttpResponse<UserInterface | null>> {
+  //   // const user: UserInterface = await this.usersService.update(id, body);
+  //   return {
+  //     data: body,
+  //     errors: [],
+  //     message: 'User was updated successfully',
+  //     status: 200,
+  //     success: true,
+  //   };
+  // }
 }
