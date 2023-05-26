@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {AuthService} from './auth.service';
 import {UserInterface} from '../users/interfaces/user.interface';
+import {UserDocument} from '../users/schemas/user.schema';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -18,7 +19,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     username: string,
     password: string,
   ): Promise<UserInterface | never> {
-    const user: UserInterface = await this.authService.validateUser(
+    const user: UserDocument = await this.authService.validateUser(
       username,
       password,
     );

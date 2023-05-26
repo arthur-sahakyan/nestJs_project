@@ -1,32 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { Model, Document, FilterQuery, UpdateQuery } from 'mongoose';
+import {Injectable} from '@nestjs/common';
+import {Document, FilterQuery, UpdateQuery, Model} from 'mongoose';
 
 @Injectable()
-export abstract class BaseRepository<T extends Document> {
-  constructor(protected readonly model: Model<T>) {}
-
-  async findById(id: string): Promise<T | null> {
-    return await this.model.findById(id).exec();
-  }
-
-  async find(filter: FilterQuery<T>): Promise<T | null> {
-    return await this.model.findOne(filter).exec();
-  }
+export class BaseRepository<T extends Document> {
+  constructor(private readonly model: Model<T>) {}
 
   async findAll(): Promise<T[]> {
-    return await this.model.find().exec();
+    return this.model.find().exec();
   }
 
-  async create(entity: T): Promise<T> {
-    return await this.model.create(entity);
+  async findById(id: string): Promise<T | null> {
+    return this.model.findById(id).exec();
   }
 
-  async updateOne(id: string, entity: UpdateQuery<T>): Promise<T | null> {
-    return await this.model.findByIdAndUpdate(id, entity, { new: true }).exec();
+  async create(data: Partial<T>): Promise<T> {
+    const newItem = new this.model(data);
+    return newItem.save();
   }
 
-  async deleteOne(id: string): Promise<boolean> {
-    const result = await this.model.findByIdAndDelete(id).exec();
+  async update(id: string, data: UpdateQuery<T>): Promise<T | null> {
+    return this.model.findByIdAndUpdate(id, data, {new: true}).exec();
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const result = await this.model.findByIdAndRemove(id).exec();
     return !!result;
+  }
+
+  async findByQuery(query: Partial<FilterQuery<T>>): Promise<T[]> {
+    return this.model.find(query as FilterQuery<T>).exec();
   }
 }

@@ -1,75 +1,61 @@
-import {Model} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
+import {UserRepository} from '../repositories/base/user.repository';
 import * as bcrypt from 'bcrypt';
-import {User, UserDocument} from '../users/schemas/user.schema';
-import {UserDto} from '../users/dtos/userDto';
-import {UsersService} from '../users/users.service';
 import {JwtService} from '@nestjs/jwt';
-import {UserInterface} from '../users/interfaces/user.interface';
-import {UserRepository} from "../repositories/base/user.repository";
+import {UserDocument} from '../users/schemas/user.schema';
+import {UserDto} from '../users/dtos/userDto';
 import {
   LoginPayloadInterface,
   LoginReturnInterface,
 } from './interfaces/login.payload';
+
 const salt = 10;
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name)
-    private userModel: Model<UserDocument>,
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
-  /**
-   * create new user
-   * @param createUserDto
-   */
-  async create(createUserDto: UserDto): Promise<User> | never {
-    const existUser = await this.usersService.findByQuery({
+  async create(createUserDto: UserDto): Promise<UserDocument> {
+    const existUser = await this.userRepository.findByQuery({
       email: createUserDto.email,
     });
-    if (existUser)
+    if (existUser) {
       throw new HttpException(
         'This user is already exist',
         HttpStatus.CONFLICT,
       );
-    const hash: string = await bcrypt.hash(createUserDto.password, salt);
+    }
 
+    const hash: string = await bcrypt.hash(createUserDto.password, salt);
     createUserDto.password = hash;
-    const createdUser = this.usersService.create(createUserDto)
-    return createdUser.save();
+
+    return this.userRepository.create(createUserDto);
   }
 
-  /**
-   * validate user by local passport strategy
-   * @param username
-   * @param pass
-   */
-  async validateUser(username: string, pass: string): Promise<UserInterface> {
-    const user: UserInterface = await this.usersService.findByQuery({
+  async validateUser(username: string, pass: string): Promise<UserDocument> {
+    const user: UserDocument[] = await this.userRepository.findByQuery({
       email: username,
     });
 
-    if (user) {
-      const isMatch: boolean = await bcrypt.compare(pass, user.password);
-      if (!isMatch) return null;
-      return user;
+    if (user && user.length > 0) {
+      const isMatch: boolean = await bcrypt.compare(pass, user[0].password);
+      if (!isMatch) {
+        return null;
+      }
+      return user[0];
     }
     return null;
   }
 
-  /**
-   * user login
-   * @param user
-   */
-  async login(user: UserInterface): Promise<LoginReturnInterface> {
+  async login(user: UserDocument): Promise<LoginReturnInterface> {
     const payload: LoginPayloadInterface = {
       username: user.email,
       sub: user._id,
     };
+
     return {
       access_token: this.jwtService.sign(payload),
     };
