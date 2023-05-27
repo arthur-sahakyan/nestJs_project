@@ -7,18 +7,25 @@ import {
 } from '@nestjs/common';
 import {AuthService} from './auth.service';
 import {UserInterface} from '../users/interfaces/user.interface';
+import {UserDocument} from '../users/schemas/user.schema';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-    constructor(private authService: AuthService) {
-        super();
-    }
+  constructor(private authService: AuthService) {
+    super();
+  }
 
-    async validate(username: string, password: string): Promise<UserInterface | never> {
-        const user: UserInterface = await this.authService.validateUser(username, password);
-        if (!user) {
-            throw new NotFoundException('Data is incorrect');
-        }
-        return user;
+  async validate(
+    username: string,
+    password: string,
+  ): Promise<UserInterface | never> {
+    const user: UserDocument = await this.authService.validateUser(
+      username,
+      password,
+    );
+    if (!user) {
+      throw new NotFoundException('Data is incorrect');
     }
+    return user;
+  }
 }

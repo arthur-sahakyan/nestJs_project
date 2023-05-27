@@ -1,33 +1,32 @@
-import {Model} from 'mongoose';
 import {Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {User, UserDocument} from './schemas/user.schema';
-import {UserInterface} from './interfaces/user.interface';
+import {UserRepository} from '../repositories/base/user.repository';
+import {UserDocument} from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
-  }
-
-  async findById(id: string): Promise<User | null> {
-    return this.userModel.findOne({_id: id}).lean();
-  }
-  async delete(id: string): Promise<string> {
-    await this.userModel.deleteOne({_id: id});
-    return 'User was deleted successfully';
+  async findById(id: string): Promise<UserDocument> {
+    return this.userRepository.findById(id);
   }
 
-  async update(id: string, data: UserInterface): Promise<User | null> {
-    return this.userModel.findOneAndUpdate(
-      {_id: id},
-      {$set: data},
-      {new: true},
-    );
+  async findAll(): Promise<UserDocument[]> {
+    return this.userRepository.findAll();
   }
-  async findByQuery<T>(filter: T): Promise<User | null> {
-    return this.userModel.findOne(filter).lean();
+
+  async create(user: Partial<UserDocument>): Promise<UserDocument> {
+    return this.userRepository.create(user);
+  }
+
+  async update(id: string, user: Partial<UserDocument>): Promise<UserDocument> {
+    return this.userRepository.update(id, user);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.userRepository.delete(id);
+  }
+
+  async findByQuery(query: Partial<UserDocument>): Promise<UserDocument[]> {
+    return this.userRepository.findByQuery(query);
   }
 }
