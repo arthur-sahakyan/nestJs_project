@@ -3,11 +3,13 @@ import {UserRepository} from '../repositories/base/user.repository';
 import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {UserDocument} from '../users/schemas/user.schema';
-import {UserDto} from '../users/dtos/userDto';
+import {UserDto} from '../users/dtos/user.dto';
 import {
   LoginPayloadInterface,
   LoginReturnInterface,
 } from './interfaces/login.payload';
+import {ForgetPasswordRepository} from "../repositories/base/forget.password.repository";
+import {ForgetPasswordDocument} from "./forgot-password/schemas/forget.password.schema";
 
 const salt = 10;
 
@@ -16,6 +18,7 @@ export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly forgetPasswordRepository: ForgetPasswordRepository
   ) {}
 
   async create(createUserDto: UserDto): Promise<UserDocument> {
