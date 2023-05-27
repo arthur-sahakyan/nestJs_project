@@ -22,7 +22,8 @@ export class AuthService {
     const existUser = await this.userRepository.findByQuery({
       email: createUserDto.email,
     });
-    if (existUser) {
+    if (existUser[0]) {
+      console.log('exists user --->', existUser)
       throw new HttpException(
         'This user is already exist',
         HttpStatus.CONFLICT,
