@@ -11,7 +11,7 @@ import {JwtStrategy} from './jwt.strategy';
 import {JwtModule} from '@nestjs/jwt';
 import {jwtConstants} from './constants';
 import {UserRepository} from '../repositories/base/user.repository';
-import { ForgotPasswordService } from './forgot-password/forgot-password.service';
+import {ForgotPasswordService} from './forgot-password/forgot-password.service';
 import {ForgetPasswordRepository} from "../repositories/base/forget.password.repository";
 
 @Module({

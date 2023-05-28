@@ -10,8 +10,8 @@ import {
 } from './interfaces/login.payload';
 import {ForgetPasswordRepository} from "../repositories/base/forget.password.repository";
 import {ForgetPasswordDocument} from "./forgot-password/schemas/forget.password.schema";
+import {createHash} from "../utils/create.hash";
 
-const salt = 10;
 
 @Injectable()
 export class AuthService {
@@ -26,14 +26,12 @@ export class AuthService {
       email: createUserDto.email,
     });
     if (existUser[0]) {
-      console.log('exists user --->', existUser)
       throw new HttpException(
         'This user is already exist',
         HttpStatus.CONFLICT,
       );
     }
-
-    const hash: string = await bcrypt.hash(createUserDto.password, salt);
+    const hash = await createHash(createUserDto.password);
     createUserDto.password = hash;
 
     return this.userRepository.create(createUserDto);

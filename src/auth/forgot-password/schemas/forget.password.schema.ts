@@ -11,6 +11,10 @@ export class ForgetPassword {
     token: string
     @Prop({required: true})
     count: number
+    @Prop({default: false})
+    block: boolean
+    @Prop({required:false})
+    time: number
 }
 
 export const ForgetPasswordSchema = SchemaFactory.createForClass(ForgetPassword);

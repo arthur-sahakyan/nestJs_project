@@ -10,6 +10,24 @@ export class ForgetPasswordRepository extends BaseRepository<ForgetPasswordDocum
         @InjectModel(ForgetPassword.name) private readonly forgetPasswordDocumentModel: Model<ForgetPasswordDocument>,
     ) {
         super(forgetPasswordDocumentModel);
+
+    }
+
+    async findAndUpdate(data: Partial<ForgetPassword>, update: Partial<ForgetPassword>): Promise<ForgetPasswordDocument> {
+        const {email, token} = data;
+        const filter = {email};
+
+
+        const defaultUpdate = {
+            $inc: {count: 1},
+            $setOnInsert: {email, count: 0},
+            $set: {token},
+        };
+        const options = {upsert: true, new: true, setDefaultsOnInsert: true};
+
+        const finalUpdate = {...defaultUpdate, ...update};
+
+        return this.forgetPasswordDocumentModel.findOneAndUpdate(filter, finalUpdate, options).exec();
     }
 
 }

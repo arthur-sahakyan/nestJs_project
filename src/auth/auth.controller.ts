@@ -20,7 +20,6 @@ export class AuthController {
     await this.authService.create(body);
     return {
       data: null,
-      errors: [],
       message: 'User was created successfully',
       status: HttpStatus.OK,
       success: true,
@@ -44,10 +43,11 @@ export class AuthController {
 
   @Post('forget-password')
   async forgetPassword(@Body() body: ForgetPasswordDto): Promise<HttpResponse<string>> {
-    await this.forgetPasswordService.create(body);
+    const message = await this.forgetPasswordService.create(body);
 
     return {
       data: 'success',
+      message,
       success: true,
       status: HttpStatus.OK
     }
