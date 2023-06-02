@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import {UsersService} from './users.service';
 import {UserInterface} from './interfaces/user.interface';
-import {UserDto} from './dtos/userDto';
+import {UserDto} from './dtos/user.dto';
 import {JwtAuthGuard} from '../auth/jwt-auth.guard';
 import {HttpResponse} from '../globalTypes';
 import {Roles} from '../customDecorators/roles.decorator';
@@ -30,7 +30,6 @@ export class UsersController {
     const users: UserInterface[] = await this.usersService.findAll();
     return {
       data: users,
-      errors: [],
       message: '',
       status: 200,
       success: true,
@@ -48,7 +47,6 @@ export class UsersController {
     const user: UserInterface = await this.usersService.findById(id);
     return {
       data: user,
-      errors: [],
       message: '',
       status: 200,
       success: true,
@@ -65,7 +63,6 @@ export class UsersController {
     await this.usersService.delete(id);
     return {
       data: null,
-      errors: [],
       message: 'User was deleted successfully',
       status: 200,
       success: true,
@@ -82,10 +79,9 @@ export class UsersController {
     @Param('id') id: string,
     @Body() body: UserDto,
   ): Promise<HttpResponse<UserInterface | null>> {
-    // const user: UserInterface = await this.usersService.update(id, body);
+    const user: UserInterface = await this.usersService.update(id, body);
     return {
       data: body,
-      errors: [],
       message: 'User was updated successfully',
       status: 200,
       success: true,

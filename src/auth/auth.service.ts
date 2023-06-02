@@ -3,19 +3,22 @@ import {UserRepository} from '../repositories/base/user.repository';
 import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {UserDocument} from '../users/schemas/user.schema';
-import {UserDto} from '../users/dtos/userDto';
+import {UserDto} from '../users/dtos/user.dto';
 import {
   LoginPayloadInterface,
   LoginReturnInterface,
 } from './interfaces/login.payload';
+import {ForgetPasswordRepository} from "../repositories/base/forget.password.repository";
+import {ForgetPasswordDocument} from "./forgot-password/schemas/forget.password.schema";
+import {createHash} from "../utils/create.hash";
 
-const salt = 10;
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly forgetPasswordRepository: ForgetPasswordRepository
   ) {}
 
   async create(createUserDto: UserDto): Promise<UserDocument> {
@@ -23,14 +26,12 @@ export class AuthService {
       email: createUserDto.email,
     });
     if (existUser[0]) {
-      console.log('exists user --->', existUser)
       throw new HttpException(
         'This user is already exist',
         HttpStatus.CONFLICT,
       );
     }
-
-    const hash: string = await bcrypt.hash(createUserDto.password, salt);
+    const hash = await createHash(createUserDto.password);
     createUserDto.password = hash;
 
     return this.userRepository.create(createUserDto);

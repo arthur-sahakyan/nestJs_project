@@ -1,13 +1,15 @@
-import {Controller, Post, Body, UseGuards, Request} from '@nestjs/common';
-import {UserDto} from '../users/dtos/userDto';
+import {Controller, Post, Body, UseGuards, Request, HttpStatus} from '@nestjs/common';
+import {UserDto} from '../users/dtos/user.dto';
 import {AuthService} from './auth.service';
 import {HttpResponse} from '../globalTypes';
 import {LocalAuthGuard} from './local-auth.guard';
 import {LoginReturnInterface} from './interfaces/login.payload';
+import {ForgetPasswordDto} from "./forgot-password/dtos/forget.password.dto";
+import {ForgotPasswordService} from "./forgot-password/forgot-password.service";
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private forgetPasswordService: ForgotPasswordService) {}
 
   /**
    * create user
@@ -18,9 +20,8 @@ export class AuthController {
     await this.authService.create(body);
     return {
       data: null,
-      errors: [],
       message: 'User was created successfully',
-      status: 200,
+      status: HttpStatus.OK,
       success: true,
     };
   }
@@ -36,7 +37,20 @@ export class AuthController {
     return {
       data: token,
       success: true,
-      status: 200,
+      status: HttpStatus.OK,
     };
+  }
+
+  @Post('forget-password')
+  async forgetPassword(@Body() body: ForgetPasswordDto): Promise<HttpResponse<string>> {
+    const message = await this.forgetPasswordService.create(body);
+
+    return {
+      data: 'success',
+      message,
+      success: true,
+      status: HttpStatus.OK
+    }
+
   }
 }
