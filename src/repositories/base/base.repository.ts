@@ -19,7 +19,6 @@ export class BaseRepository<T extends Document> {
   }
 
   async update(id: string, data: UpdateQuery<T>): Promise<T | null> {
-    console.log(id, data)
     return this.model.findByIdAndUpdate(id, data, {new: true}).exec();
   }
 
