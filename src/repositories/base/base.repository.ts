@@ -19,7 +19,6 @@ export class BaseRepository<T extends Document> {
   }
 
   async update(id: string, data: UpdateQuery<T>): Promise<T | null> {
-    console.log(id, data)
     return this.model.findByIdAndUpdate(id, data, {new: true}).exec();
   }
 
@@ -30,5 +29,8 @@ export class BaseRepository<T extends Document> {
 
   async findByQuery(query: Partial<FilterQuery<T>>): Promise<T[]> {
     return this.model.find(query as FilterQuery<T>).exec();
+  }
+  async findOneByQuery(query: Partial<FilterQuery<T>>): Promise<T> {
+    return this.model.findOne(query as FilterQuery<T>).exec();
   }
 }

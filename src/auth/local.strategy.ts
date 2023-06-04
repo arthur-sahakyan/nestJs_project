@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  BadRequestException
 } from '@nestjs/common';
 import {AuthService} from './auth.service';
 import {UserInterface} from '../users/interfaces/user.interface';
@@ -25,6 +26,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     );
     if (!user) {
       throw new NotFoundException('Data is incorrect');
+    } else if (!user.active) {
+      throw new BadRequestException('You are not active please verify your email.');
     }
     return user;
   }
