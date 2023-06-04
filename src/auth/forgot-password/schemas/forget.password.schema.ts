@@ -14,7 +14,9 @@ export class ForgetPassword {
   @Prop({default: false})
   block: boolean;
   @Prop({required: false})
-  time: string;
+  expirationTime: string;
+  @Prop({required: false})
+  blockTime: string;
 }
 
 export const ForgetPasswordSchema =

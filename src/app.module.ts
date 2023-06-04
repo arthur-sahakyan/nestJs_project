@@ -5,7 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
+import { EmailModule } from './email/email.module';
 import * as process from "process";
+import configuration from "./config/configuration";
 
 @Module({
   imports: [
@@ -16,7 +18,10 @@ import * as process from "process";
       }),
     }),
     UsersModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      load: [configuration],
+    }),
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
