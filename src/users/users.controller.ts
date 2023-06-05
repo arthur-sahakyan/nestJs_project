@@ -15,6 +15,8 @@ import {HttpResponse} from '../globalTypes';
 import {Roles} from '../customDecorators/roles.decorator';
 import {Role} from '../enums/role.enum';
 import {RolesGuard} from '../guards/roles.guard';
+import { textReplacer } from "../utils/text.replacer";
+import { deleted, updated } from "../constants/messages.constants";
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -63,7 +65,7 @@ export class UsersController {
     await this.usersService.delete(id);
     return {
       data: null,
-      message: 'User was deleted successfully',
+      message: textReplacer(deleted, {item: 'user'}),
       status: 200,
       success: true,
     };
@@ -82,7 +84,7 @@ export class UsersController {
     const user: UserInterface = await this.usersService.update(id, body);
     return {
       data: body,
-      message: 'User was updated successfully',
+      message: textReplacer(updated, {item: 'user'}),
       status: 200,
       success: true,
     };
