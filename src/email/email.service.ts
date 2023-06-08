@@ -9,15 +9,18 @@ export class EmailService {
     @Inject('MAILER_TRANSPORTER') private transporter: nodemailer.Transporter,
   ) {}
 
-  async sendVerificationEmail(
-    email: string,
-    verificationToken: string,
-  ): Promise<void> {
+  async sendVerificationEmail({
+    email,
+    text,
+    subject,
+  }: {
+    [key: string]: string;
+  }): Promise<void> {
     const mailOptions: nodemailer.SendMailOptions = {
       from: process.env.EMAIL_USERNAME,
       to: email,
-      subject: 'Verify Your Email',
-      text: `Please click the following link to verify your email: ${verificationToken}`,
+      subject,
+      text,
     };
 
     await this.transporter.sendMail(mailOptions);

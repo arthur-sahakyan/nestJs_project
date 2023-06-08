@@ -3,6 +3,8 @@ import {ConfigModule, ConfigService} from '@nestjs/config';
 import {EmailService} from './email.service';
 import * as nodemailer from 'nodemailer';
 import * as process from 'process';
+import {isRequired} from '../constants/messages.constants';
+import {textReplacer} from '../utils/text.replacer';
 
 @Module({
   imports: [ConfigModule],
@@ -17,16 +19,19 @@ import * as process from 'process';
         console.log(emailPassword);
 
         if (!emailService || !emailUsername || !emailPassword) {
-          throw new Error('Missing email configuration.');
+          throw new Error(
+            textReplacer(isRequired, {item: 'email configuration'}),
+          );
         }
 
         const transporter = nodemailer.createTransport({
           service: 'gmail',
-          host: 'smtp.ethereal.email',
-          port: 587,
+          host: 'smtp.gmail.com',
+          secure: true,
+          port: 465,
           auth: {
-            user: 'ethereal.user@ethereal.email',
-            pass: 'verysecret',
+            user: emailUsername,
+            pass: emailPassword,
           },
         });
         return transporter;
