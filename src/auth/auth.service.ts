@@ -4,14 +4,18 @@ import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {UserDocument} from '../users/schemas/user.schema';
 import {UserDto} from '../users/dtos/user.dto';
-import {LoginPayloadInterface, LoginReturnInterface} from './interfaces/login.payload';
-import {ForgetPasswordRepository} from "../repositories/base/forget.password.repository";
-import {VerificationRepository} from "../repositories/base/verification.repository";
-import {EmailService} from "../email/email.service";
-import {createHash} from "../utils/create.hash";
+import {
+  LoginPayloadInterface,
+  LoginReturnInterface,
+} from './interfaces/login.payload';
+import {ForgetPasswordRepository} from '../repositories/base/forget.password.repository';
+import {VerificationRepository} from '../repositories/base/verification.repository';
+import {EmailService} from '../email/email.service';
+import {createHash} from '../utils/create.hash';
 import * as moment from 'moment';
-import {EXPIRES_MINUTES, TIME_FORMAT} from "../constants/auth.constants";
-
+import {EXPIRES_MINUTES, TIME_FORMAT} from '../constants/auth.constants';
+import {textReplacer} from '../utils/text.replacer';
+import {alreadyExists} from '../constants/messages.constants';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +24,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly forgetPasswordRepository: ForgetPasswordRepository,
     private readonly verificationRepository: VerificationRepository,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createUserDto: UserDto): Promise<void> {
@@ -29,7 +33,9 @@ export class AuthService {
     });
     if (existUser) {
       throw new HttpException(
-        'This user is already exist.Please log in',
+        {
+          message: textReplacer(alreadyExists, {item: 'user'}),
+        },
         HttpStatus.CONFLICT,
       );
     }
@@ -37,16 +43,23 @@ export class AuthService {
 
     const createdUser = await this.userRepository.create(createUserDto);
 
-    const verificationHash = await createHash(createdUser._id + createdUser.email);
-    const dateTime = moment.utc().add(EXPIRES_MINUTES, 'minutes').format(TIME_FORMAT);
+    const verificationHash = await createHash(
+      createdUser._id + createdUser.email,
+    );
+    const dateTime = moment
+      .utc()
+      .add(EXPIRES_MINUTES, 'minutes')
+      .format(TIME_FORMAT);
     await this.verificationRepository.create({
       time: dateTime,
       token: verificationHash,
-      userId: createdUser._id
+      userId: createdUser._id,
     });
 
-    await this.emailService.sendVerificationEmail(createUserDto.email, verificationHash);
-
+    await this.emailService.sendVerificationEmail(
+      createUserDto.email,
+      verificationHash,
+    );
   }
 
   async validateUser(username: string, pass: string): Promise<UserDocument> {
