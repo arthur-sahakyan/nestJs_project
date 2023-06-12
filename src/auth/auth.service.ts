@@ -1,4 +1,7 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as ejs from 'ejs';
 import {UserRepository} from '../repositories/base/user.repository';
 import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
@@ -13,7 +16,7 @@ import {VerificationRepository} from '../repositories/base/verification.reposito
 import {EmailService} from '../email/email.service';
 import {createHash} from '../utils/create.hash';
 import * as moment from 'moment';
-import {EXPIRES_MINUTES, TIME_FORMAT} from '../constants/auth.constants';
+import {EXPIRES_MINUTES} from '../constants/auth.constants';
 import {textReplacer} from '../utils/text.replacer';
 import {
   alreadyExists,
@@ -22,6 +25,7 @@ import {
   verifyEmailSubject,
 } from '../constants/messages.constants';
 import {ConfigService} from '@nestjs/config';
+import {createDateTimeByMinutes} from "../utils/date-time";
 
 @Injectable()
 export class AuthService {
@@ -53,25 +57,29 @@ export class AuthService {
     const verificationHash = await createHash(
       createdUser._id + createdUser.email,
     );
-    const dateTime = moment
-      .utc()
-      .add(EXPIRES_MINUTES, 'minutes')
-      .format(TIME_FORMAT);
+    const dateTime = createDateTimeByMinutes(EXPIRES_MINUTES);
     await this.verificationRepository.create({
       time: dateTime,
       token: verificationHash,
       userId: createdUser._id,
     });
-    const verificationHref = `${this.configService.get(
+    const verificationUrl = `${this.configService.get(
       'BASE_URL',
     )}/auth/verify/${verificationHash}`;
-    const verificationUrl = `<a href="${verificationHref}"></a>`;
+    const templatePath = path.join(path.resolve(), 'src', 'templates', 'account.verification.ejs');
+    const template = await new Promise((res, rej) => {
+      fs.readFile(templatePath, 'utf8', function(err, data){
+        if (err) rej(textReplacer(inValid, {item: 'path'}))
+        res(data)
+      });
+    });
 
-    await this.emailService.sendVerificationEmail({
+    const html = ejs.render(template, {email: createUserDto.email, verificationUrl})
+
+    await this.emailService.sendEmail({
       email: createUserDto.email,
-      verificationToken: verificationHash,
       subject: verifyEmailSubject,
-      text: textReplacer(verifyEmail, {verificationUrl}),
+      html,
     });
   }
 

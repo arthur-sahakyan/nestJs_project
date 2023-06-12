@@ -16,3 +16,4 @@ export const isRequired = 'The {item is required}';
 export const verifyEmail =
   'Please click the following link to verify your email: {verificationUrl}';
 export const verifyEmailSubject = 'Email Verification';
+export const resetPasswordSubject = 'Reset Password';

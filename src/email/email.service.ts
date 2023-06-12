@@ -9,9 +9,9 @@ export class EmailService {
     @Inject('MAILER_TRANSPORTER') private transporter: nodemailer.Transporter,
   ) {}
 
-  async sendVerificationEmail({
+  async sendEmail({
     email,
-    text,
+    html,
     subject,
   }: {
     [key: string]: string;
@@ -20,7 +20,7 @@ export class EmailService {
       from: process.env.EMAIL_USERNAME,
       to: email,
       subject,
-      text,
+      html,
     };
 
     await this.transporter.sendMail(mailOptions);
