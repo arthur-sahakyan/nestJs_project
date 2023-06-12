@@ -57,6 +57,19 @@ export class AuthController {
     };
   }
 
+  @Get('verify/:token')
+  async verifyUserAccount(
+    @Param('token') token: string,
+  ): Promise<HttpResponse<string>> {
+    await this.authService.verifyAccount(token);
+    return {
+      data: 'success',
+      message: 'ok',
+      success: true,
+      status: HttpStatus.OK,
+    };
+  }
+
   /**
    * get reset password request
    * @param body

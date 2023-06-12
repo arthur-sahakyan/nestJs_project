@@ -1,5 +1,6 @@
 import {Injectable} from '@nestjs/common';
-import {Document, FilterQuery, UpdateQuery, Model} from 'mongoose';
+import { Document, FilterQuery, UpdateQuery, Model, Types } from 'mongoose';
+import {ObjectId} from 'mongoose';
 
 @Injectable()
 export class BaseRepository<T extends Document> {

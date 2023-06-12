@@ -1,4 +1,7 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import * as ejs from 'ejs';
+import * as path from 'path';
+import * as fs from 'fs';
 import {ForgetPasswordRepository} from '../../repositories/base/forget.password.repository';
 import {ForgetPasswordDto} from './dtos/forget.password.dto';
 import {UserRepository} from '../../repositories/base/user.repository';
@@ -17,10 +20,11 @@ import {
   expired,
   maxLimitForResetPassword,
   blocked,
-  emailHasSent,
+  emailHasSent, resetPasswordSubject,
 } from '../../constants/messages.constants';
 import {textReplacer} from '../../utils/text.replacer';
 import {CreatePasswordDto} from './dtos/create.password.dto';
+import {EmailService} from "../../email/email.service";
 
 @Injectable()
 export class ForgotPasswordService {
@@ -28,6 +32,7 @@ export class ForgotPasswordService {
     private readonly forgetPasswordRepository: ForgetPasswordRepository,
     private readonly usersRepository: UserRepository,
     private configService: ConfigService,
+    private emailService: EmailService
   ) {}
 
   /**
@@ -65,6 +70,26 @@ export class ForgotPasswordService {
         expirationTime,
       });
     }
+
+    const forgetPasswordUrl = `${this.configService.get(
+        'BASE_URL',
+    )}/auth/forget-password/confirm/${data.email}/${token}`;
+    const templatePath = path.join(path.resolve(), 'src', 'templates', 'forgot.password.ejs');
+    const template = await new Promise((res, rej) => {
+      fs.readFile(templatePath, 'utf8', function(err, data){
+        if (err) rej(textReplacer(inValid, {item: 'path'}))
+        res(data)
+      });
+    });
+
+    const html = ejs.render(template, {email: data.email, forgetPasswordUrl})
+
+    await this.emailService.sendEmail({
+      email: data.email,
+      subject: resetPasswordSubject,
+      html,
+    });
+
     return textReplacer(emailHasSent, {item: 'reset password'});
   }
 
@@ -159,6 +184,8 @@ export class ForgotPasswordService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    await this.forgetPasswordRepository.delete(existsForgetDocument.id);
     return `${this.configService.get(
       'FRONT_END_BASE_URL',
     )}/createNewPassword/?email=${existsForgetDocument.email}`;
@@ -167,6 +194,9 @@ export class ForgotPasswordService {
   async createNewPassword(body: CreatePasswordDto): Promise<boolean | never> {
     const {password, email} = body;
     const user = await this.usersRepository.findOneByQuery({email});
+    const existResetPasswordDocument = await this.forgetPasswordRepository.findOneByQuery({
+      email
+    });
 
     if (!user) {
       throw new HttpException(
@@ -174,6 +204,14 @@ export class ForgotPasswordService {
         HttpStatus.NOT_FOUND,
       );
     }
+
+    if (!existResetPasswordDocument) {
+      throw new HttpException(
+          {success: false, message: textReplacer(notFound, {item: 'reset password request'})},
+          HttpStatus.NOT_FOUND,
+      );
+    }
+
     const newPassword = await createHash(password);
 
     await this.usersRepository.update(user._id, {password: newPassword});

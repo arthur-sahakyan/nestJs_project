@@ -11,3 +11,9 @@ export const updated = 'The {item} has been successfully updated';
 export const deleted = 'The {item} was deleted successfully';
 export const tooShort = 'The {item} is too short';
 export const twoItemsMustMatch = 'The {item1} must match the {item2}';
+
+export const isRequired = 'The {item is required}';
+export const verifyEmail =
+  'Please click the following link to verify your email: {verificationUrl}';
+export const verifyEmailSubject = 'Email Verification';
+export const resetPasswordSubject = 'Reset Password';
