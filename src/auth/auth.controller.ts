@@ -8,24 +8,31 @@ import {
   Get,
   Param,
   Patch,
+  UploadedFile,
+  UseInterceptors
 } from '@nestjs/common';
 import {UserDto} from '../users/dtos/user.dto';
 import {AuthService} from './auth.service';
 import {HttpResponse} from '../globalTypes';
-import {LocalAuthGuard} from './local-auth.guard';
+import {LocalAuthGuard} from '../guards/local-auth.guard';
 import {LoginReturnInterface} from './interfaces/login.payload';
 import {ForgetPasswordDto} from './forgot-password/dtos/forget.password.dto';
 import {ForgotPasswordService} from './forgot-password/forgot-password.service';
 import {CreatePasswordDto} from './forgot-password/dtos/create.password.dto';
 import {textReplacer} from '../utils/text.replacer';
-import {emailHasSent, updated} from '../constants/messages.constants';
+import {emailHasSent, updated, uploadedSuccessfully} from '../constants/messages.constants';
+import {FileInterceptor} from '@nestjs/platform-express';
+import {S3Service} from "../aws/s3.service";
+
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private forgetPasswordService: ForgotPasswordService,
-  ) {}
+    private s3Service: S3Service
+  ) {
+  }
 
   /**
    * create user
@@ -94,7 +101,7 @@ export class AuthController {
    */
   @Get('forget-password/confirm/:email/**')
   async confirmForgetPassword(
-    @Param() params: {[key: string]: string},
+    @Param() params: { [key: string]: string },
   ): Promise<HttpResponse<string>> {
     const url = await this.forgetPasswordService.confirmForgetPasswordToken(
       params,
@@ -123,4 +130,20 @@ export class AuthController {
       message: textReplacer(updated, {item: 'password'}),
     };
   }
+
+  @Post('upload')
+
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<HttpResponse<string>> {
+    const {url} = await this.s3Service.fileUpload(file);
+    return {
+      data: url,
+      status: 200,
+      success: true,
+      message: textReplacer(uploadedSuccessfully, {item: 'User avatar'}),
+    };
+
+
+  }
+
 }
