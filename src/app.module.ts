@@ -14,7 +14,7 @@ import configuration from './config/configuration';
     AuthModule,
     MongooseModule.forRootAsync({
       useFactory: () => ({
-        uri: `mongodb://${process.env.DB_HOST}/${process.env.DB_NAME}`, // Use the correct variable name from the .env file
+        uri: `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, // Use the correct variable name from the .env file
       }),
     }),
     UsersModule,
