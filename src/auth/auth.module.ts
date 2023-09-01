@@ -20,6 +20,8 @@ import {VerificationRepository} from '../repositories/base/verification.reposito
 import {VerificationSchema, Verification} from './schemas/verification.schema';
 import {EmailModule} from '../email/email.module';
 import {ConfigService} from '@nestjs/config';
+import {S3Config} from "../aws/s3.config";
+import {S3Service} from "../aws/s3.service";
 
 @Module({
   imports: [
@@ -46,6 +48,8 @@ import {ConfigService} from '@nestjs/config';
     ForgotPasswordService,
     VerificationRepository,
     ConfigService,
+    S3Config,
+    S3Service
   ],
 })
 export class AuthModule {}

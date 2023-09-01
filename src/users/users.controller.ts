@@ -10,7 +10,7 @@ import {
 import {UsersService} from './users.service';
 import {UserInterface} from './interfaces/user.interface';
 import {UserDto} from './dtos/user.dto';
-import {JwtAuthGuard} from '../auth/jwt-auth.guard';
+import {JwtAuthGuard} from '../guards/jwt-auth.guard';
 import {HttpResponse} from '../globalTypes';
 import {Roles} from '../customDecorators/roles.decorator';
 import {Role} from '../enums/role.enum';
