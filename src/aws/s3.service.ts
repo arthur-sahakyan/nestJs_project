@@ -22,6 +22,6 @@ export class S3Service {
 
     const result = await this.s3.upload(params).promise();
 
-    return result.Location;
+    return {url: result.Location};
   }
 }

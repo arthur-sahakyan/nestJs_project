@@ -24,7 +24,10 @@ export class User {
   roleType: string;
 
   @Prop({default: false})
-  active: boolean
+  active: boolean;
+
+  @Prop({default: false})
+  avatar: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

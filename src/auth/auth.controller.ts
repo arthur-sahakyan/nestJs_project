@@ -20,10 +20,14 @@ import {ForgetPasswordDto} from './forgot-password/dtos/forget.password.dto';
 import {ForgotPasswordService} from './forgot-password/forgot-password.service';
 import {CreatePasswordDto} from './forgot-password/dtos/create.password.dto';
 import {textReplacer} from '../utils/text.replacer';
-import {emailHasSent, updated, uploadedSuccessfully} from '../constants/messages.constants';
+import {
+  emailHasSent,
+  updated,
+  uploadedSuccessfully,
+} from '../constants/messages.constants';
 import {FileInterceptor} from '@nestjs/platform-express';
-import {S3Service} from "../aws/s3.service";
-
+import {S3Service} from '../aws/s3.service';
+import {UserInterface} from '../users/interfaces/user.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -132,12 +136,17 @@ export class AuthController {
   }
 
   @Post('upload')
-
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<HttpResponse<string>> {
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<HttpResponse<UserInterface>> {
     const {url} = await this.s3Service.fileUpload(file);
+    const data = await this.authService.updateUserAvatar(
+      '64f1f17593d403214a93dfdb', // todo add req.user
+      url,
+    );
     return {
-      data: url,
+      data: data,
       status: 200,
       success: true,
       message: textReplacer(uploadedSuccessfully, {item: 'User avatar'}),
