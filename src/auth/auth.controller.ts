@@ -9,8 +9,9 @@ import {
   Param,
   Patch,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
+import {User} from "../customDecorators/user.decorator";
 import {UserDto} from '../users/dtos/user.dto';
 import {AuthService} from './auth.service';
 import {HttpResponse} from '../globalTypes';
@@ -28,11 +29,14 @@ import {
 import {FileInterceptor} from '@nestjs/platform-express';
 import {S3Service} from '../aws/s3.service';
 import {UserInterface} from '../users/interfaces/user.interface';
+import {JwtAuthGuard} from "../guards/jwt-auth.guard";
+import {UsersService} from "../users/users.service";
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
+    private usersService: UsersService,
     private forgetPasswordService: ForgotPasswordService,
     private s3Service: S3Service
   ) {
@@ -135,14 +139,22 @@ export class AuthController {
     };
   }
 
+  /**
+   * Upload user avatar
+   * @param user
+   * @param file
+   */
+
   @Post('upload')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
+    @User() user: UserInterface,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<HttpResponse<UserInterface>> {
     const {url} = await this.s3Service.fileUpload(file);
-    const data = await this.authService.updateUserAvatar(
-      '64f1f17593d403214a93dfdb', // todo add req.user
+    const data = await this.usersService.updateUserAvatar(
+      user._id,
       url,
     );
     return {
@@ -151,8 +163,5 @@ export class AuthController {
       success: true,
       message: textReplacer(uploadedSuccessfully, {item: 'User avatar'}),
     };
-
-
   }
-
 }
