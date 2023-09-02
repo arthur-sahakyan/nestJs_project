@@ -29,4 +29,8 @@ export class UsersService {
   async findByQuery(query: Partial<UserDocument>): Promise<UserDocument[]> {
     return this.userRepository.findByQuery(query);
   }
+
+  async updateUserAvatar(userId: string, avatar: string,): Promise<UserDocument> {
+    return await this.userRepository.update(userId, {avatar});
+  }
 }

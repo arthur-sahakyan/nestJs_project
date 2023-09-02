@@ -135,12 +135,4 @@ export class AuthService {
     return true;
   }
 
-  async updateUserAvatar(
-    userId: string,
-    avatar: string,
-  ): Promise<UserDocument> {
-    return await this.userRepository.update(userId, {
-      avatar,
-    });
-  }
 }
