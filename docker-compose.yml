@@ -1,0 +1,23 @@
+version: '3'
+services:
+  nestjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env  # Path to your .env file
+    environment:
+      - NODE_ENV=local
+    volumes:
+      - ./app:/usr/src/app  # Map the app directory on the host to the app directory in the container
+    depends_on:
+      - mongodb  # You can change this to match your database container name if needed
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./mongodb-data:/data/db
